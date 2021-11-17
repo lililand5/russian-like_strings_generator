@@ -11,9 +11,9 @@ describe "rl_str_gen" do
   end
 
 
-  it "It should not co latin latters, digits or underlines" do
+  it "It should contain only valid symbols" do
     1000.times do
-      expect(rl_str_gen.match? /\w/).to be(false)
+      expect(rl_str_gen.match? /[^а-яё ,\.:;\-!\?\"\']/i).to be false
     end
   end
 
@@ -51,20 +51,27 @@ describe "rl_str_gen" do
 
 
   it "If should allow only particular signs in the end of the sentence" do
+
     1000.times do
       expect(rl_str_gen.match? /.*[а-яё]+[\"\']?(\.|!|\?|!\?|\.\.\.)\z/)
                        .to be true
     end
   end
 
-  it "It should not allow multiple punctuation marcs" do 
-    
-  end
+  # it "It should not allow multiple punctuation marcs" do 
+
+  # end
 
 
   it "If should not allow unwanted symbols inside words" do
 
+    1000.times do
+      expect(rl_str_gen.match? /[а-яё\-][^а-яё \-]+[а-яё\-]/).to be false
+    end
+      # words = rl_str_gen.split.reject{|el| el=="-"}
+    end
+    # /\A[\"\']?[а-яё]+(?:-[а-яё]+)?[\"\']?\z/i
   end
-end
 
 
+  # it "It should not allow multiple dashes" do #
