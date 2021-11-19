@@ -41,37 +41,47 @@ describe "rl_str_gen" do
     end
   end
 
+# откидываем последнее слово 
+# и в массиве строк берем только последний символ строки
+it "If should allow only particular marks after words within sentence" do
+  1000.times do
+    with_in = rl_str_gen.split.reject{|el| el == "-"}[0..-2]
+    expect(with_in.reject{|el| el.match? /[а-яё][\"\']?[,:;]?\z/i}
+      .size)
+    .to eq(0)
+  end
+end
 
-  it "If should allow only particular signs after words with it sentence" do
+
+
+it "If should allow only particular signs in the end of the sentence" do
+  1000.times do
+    expect(rl_str_gen.match? /.*[а-яё]+[\"\']?(\.|!|\?|!\?|\.\.\.)\z/)
+    .to be true
+  end
+end
+
+
+
+
+it "If should not allow unwanted symbols inside words" do
+  1000.times do
+    expect(rl_str_gen.match? /[а-яё\-][^а-яё \-]+[а-яё\-]/).to be false
+  end
+end
+
+
+# не должно позволять минусы (dashes) в начале слова 
+# если ты внутрислова, ты нашел то что непотребство, но перед ним стоит буква, если надешь такой случай - игнорируй
+  it "It should exclude unwanted symbols before word's" do
     1000.times do
-      with_in = rl_str_gen.split.reject{|el| el == "-"}[0..-2]
-      expect(with_in.select{|el| el[-1].match? /[^,:\"\'а-яё]/}.size).to eq(0)
+      expect(rl_str_gen.match? /(?<![а-яё])[^ \'\"а-яё]+\b[а-яё]/i).to be false
     end
   end
+end
 
 
-  it "If should allow only particular signs in the end of the sentence" do
-
-    1000.times do
-      expect(rl_str_gen.match? /.*[а-яё]+[\"\']?(\.|!|\?|!\?|\.\.\.)\z/)
-                       .to be true
-    end
-  end
-
-  # it "It should not allow multiple punctuation marcs" do 
-
-  # end
 
 
-  it "If should not allow unwanted symbols inside words" do
-
-    1000.times do
-      expect(rl_str_gen.match? /[а-яё\-][^а-яё \-]+[а-яё\-]/).to be false
-    end
-      # words = rl_str_gen.split.reject{|el| el=="-"}
-    end
-    # /\A[\"\']?[а-яё]+(?:-[а-яё]+)?[\"\']?\z/i
-  end
-
-
-  # it "It should not allow multiple dashes" do #
+#Не позволяет множественные минусы
+it "It should not allow multiple dashes" do end
