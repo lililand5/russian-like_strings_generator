@@ -2,7 +2,7 @@ require "rspec"
 require_relative "../app/methods"
 
 #russian-like_strings_generator_spec
-describe "rl_str_gen" do 
+describe "rl_str_gen" do
 
   # должен вернуть строку 
   it "It should return string" do
@@ -66,7 +66,7 @@ describe "rl_str_gen" do
   # не допускать нежелательные символы внутри слов 
   it "If should not allow unwanted symbols inside words" do
     1000.times do
-      expect(rl_str_gen.match(/[а-яё\-][^а-яё \-]+[а-яё\-]/)).to be_nil
+      expect(rl_str_gen.match(/[а-яё\-][^а-яё \-]+[а-яё\-]/i)).to be_nil
     end
   end
 
@@ -82,7 +82,7 @@ describe "rl_str_gen" do
   #Не допускается использование нескольких знаков препинания. 
   it "It should not allow multiple punctuation marks" do 
     1000.times do
-      expect(rl_str_gen.match(/([^а-яё\.]) *\1/i)).to be_nil
+      expect(rl_str_gen.match(/([^а-яё\.]) *\1/)).to be_nil
     end
   end
 
@@ -96,41 +96,102 @@ describe "rl_str_gen" do
     end
   end
 
-  # не должно допускать слов, начинающихся с 'ь ъ ы 
-  it "should not allow words starting with 'ь ъ ы'" do
-
+  # Не должно допускать слов, начинающихся с 'ь ъ ы 
+  it "should not allow words starting with \"ь ъ ы\"" do
+    1000.times do 
+      expect(rl_str_gen.match(/\b[ьъы]/i)).to be_nil
+    end
   end
 
   # Не допускать заглавных букв после дефис и внутри слова если слово не аббревиатура
-  it "It should not contain capital latters inside words if not an accronym" do
+  it "It should not contain capital letters inside words if not an accronym" do
+    1000.times do 
+      words = rl_str_gen.gsub(/[^а-яё ]/i, "").split
+      words.each do |el|
+        # если нашел абривиатуру, то ничего не делать
+        unless el.match? /\АА-ЯЁ{2,}\z/
+          expect(el.match /\A.+[А-ЯЁ]/).to be_nil
+        end
+      end
+    end
+  end
 
+  # Абривиатуры не должны быть не больше 5 букв
+  it "It should allow accronyms only to 5 letters long" do
+    1000.times do
+      accr = rl_str_gen.gsub(/[^а-яё ]/i, "").scan(/А-ЯЁ{2,}/)
+      expect(accr.count{ |a| a.size > 5 }).to eq(0)
+    end
+  end
+
+
+  # Не допускать однобуквенные слова внутри предложения
+  it "It should not allow one-letter words with a capital letter" do 
+    1000.times do 
+      expect(rl_str_gen.match(/ \"?[А-ЯЁ]\b/)).to be_nil
+    end
   end
   
-  # В начале слова всегда должна стоять гласная после 'й'
-  it "It should allways have vowel after 'й' at the beginning of the word" do 
-
+  # В начале слова всегда должна стоять гласная "е" или "о" после 'й'
+  it "It should always have vowel after 'й' at the beginning of the word" do 
+    1000.times do 
+      expect(rl_str_gen.match /\b[й][^ео]/i).to be_nil
+    end
   end
 
+
+  # Он должен разрешать только определенные буквы после "й" внутри слов.
+  it "It should allow only particular letters after 'й' inside words" do 
+    1000.times do 
+      expect(rl_str_gen.match /\B[й][ьъыёуаэиюжй]/i).to be_nil
+    end
+  end
+
+
+  # В многобуквенном слове должна быть гласная.
+  it "It should always be vowel in 2 and 3-letter words" do 
+    1000.times do
+      rl_str_gen
+      .gsub(/[^а-яё ]/i, "")
+      .split
+      .select{ |el| el.size == 2 or el.size == 3 }
+      .reject { |el| el.match?(/\A[А-ЯЁ]+\z/) }
+      .each do |word|
+        expect(word).to match(/[аоуэыияеёю]/i)
+      end
+    end
+  end 
+
+
   # Он не должен допускать более 4-х согласных букв подряд
-  it "It should not allow more than 4 consonant latters in a row" do 
+  it "It should not allow more than 4 consonant letters in a row" do 
 
   end
 
   # Он не должен допускать более 2-х гласных букв подряд
-  it "It should not allow more than 2 vowel latters in a row" do 
+  it "It should not allow more than 2 vowel letters in a row" do 
 
   end
+
 
   # Он не должен допускать более двух одинаковых согласных букв подряд
-  it "It should not allow more than 2 same consonant latters in a row" do 
+  it "It should not allow more than 2 same consonant letters in a row" do 
+
+  end 
+
+  # Он должен содержать гласные, если не более 1 буквы и не аббревиатура. 
+  it "It should contains vowels if not more than 1 letter and not an accronym" do
 
   end
 
-  # Он должен содержать гласные, если не более 1 буквы и не аббревиатура. 
-  it "It should contains vowels if not more than 1 latter and not an accronym" do
+  # Начало предложения с заглавной буквы(помнить на счет кавычек, позволять кавычку в 
+  # начале строки)
+  it "It should start with a capital letter" do
+
+  end
+
+  it "It should allow only particular one-letter words " do
 
   end
 
 end
-
-
