@@ -11,6 +11,7 @@ describe "rl_str_gen" do
     end
   end
 
+
   # долны быть только допустимые символы
   it "It should contain only valid symbols" do
     1000.times do
@@ -18,12 +19,14 @@ describe "rl_str_gen" do
     end
   end
 
+
   # не допускает более 300 символов
   it "It should not be ower 300 symbols" do 
     10000.times do
       expect(rl_str_gen.size).to be <= 300
     end
   end
+
 
   # от 2 до 15 слов
   it "It should contain from 2 to 15 words" do 
@@ -35,6 +38,7 @@ describe "rl_str_gen" do
     end
   end
 
+
   # не должен содержать более 15 букв
   it "It should not contains wors over 15 letters" do
     1000.times do
@@ -42,6 +46,7 @@ describe "rl_str_gen" do
       expect(words.count{|el| el.size > 15}).to eq(0)
     end
   end
+
 
   # откидываем последнее слово 
   # и в массиве строк берем только последний символ строки
@@ -55,6 +60,7 @@ describe "rl_str_gen" do
     end
   end
 
+
   # только определенные знаки вконце предложения
   it "If should allow only particular signs in the end of the sentence" do
     1000.times do
@@ -63,12 +69,14 @@ describe "rl_str_gen" do
     end
   end
 
+
   # не допускать нежелательные символы внутри слов 
   it "If should not allow unwanted symbols inside words" do
     1000.times do
       expect(rl_str_gen.match(/[а-яё\-][^а-яё \-]+[а-яё\-]/i)).to be_nil
     end
   end
+
 
   # не должно позволять минусы (dashes) в начале слова 
   # как работает провера если ты внутри слова, ты нашел то что непотребство, 
@@ -79,12 +87,14 @@ describe "rl_str_gen" do
     end
   end
 
+
   #Не допускается использование нескольких знаков препинания. 
   it "It should not allow multiple punctuation marks" do 
     1000.times do
       expect(rl_str_gen.match(/([^а-яё\.]) *\1/)).to be_nil
     end
   end
+
 
   # Правильное использование кавычек(четное число)
   it "It should correctly use quotation marks" do
@@ -96,6 +106,7 @@ describe "rl_str_gen" do
     end
   end
 
+
   # Не должно допускать слов, начинающихся с 'ь ъ ы 
   it "should not allow words starting with \"ь ъ ы\"" do
     1000.times do 
@@ -103,18 +114,20 @@ describe "rl_str_gen" do
     end
   end
 
+
+  # Проверить
   # Не допускать заглавных букв после дефис и внутри слова если слово не аббревиатура
-  it "It should not contain capital letters inside words if not an accronym" do
-    1000.times do 
+  it "should not contain capital letters inside words if not an acronym" do
+    1000.times do
       words = rl_str_gen.gsub(/[^а-яё ]/i, "").split
       words.each do |el|
-        # если нашел абривиатуру, то ничего не делать
-        unless el.match? /\АА-ЯЁ{2,}\z/
-          expect(el.match /\A.+[А-ЯЁ]/).to be_nil
+        unless el.match?(/\A[А-ЯЁ]{2,}\z/)
+          expect( el.match(/\A.+[А-ЯЁ]/) ).to be_nil
         end
       end
     end
   end
+
 
   # Абривиатуры не должны быть не больше 5 букв
   it "It should allow accronyms only to 5 letters long" do
@@ -131,7 +144,8 @@ describe "rl_str_gen" do
       expect(rl_str_gen.match(/ \"?[А-ЯЁ]\b/)).to be_nil
     end
   end
-  
+
+
   # В начале слова всегда должна стоять гласная "е" или "о" после 'й'
   it "It should always have vowel after 'й' at the beginning of the word" do 
     1000.times do 
@@ -163,35 +177,96 @@ describe "rl_str_gen" do
   end 
 
 
+  # Он должен разрешать только определенные однобуквенные слова
+  it "It should allow only particular one-letter words " do
+    1000.times do
+      rl_str_gen.scan(/\b[а-яё]\b/i)
+      .each do 
+        |word| expect(word).to match(/[аявоуиксжб]/i)
+      end
+    end
+  end
+
+
   # Он не должен допускать более 4-х согласных букв подряд
   it "It should not allow more than 4 consonant letters in a row" do 
-
+    1000.times do
+      rl_str_gen
+      .gsub(/[^а-яё ]/i, "")
+      .split
+      .each do |el|
+        # если нашел абривиатуру, то ничего не делать
+        unless el.match? /\АА-ЯЁ{2,}\z/
+          expect(el.match /\A.+[^аоуэыияеёю ]{5,}/i).to be_nil
+        end
+      end
+    end
   end
 
-  # Он не должен допускать более 2-х гласных букв подряд
+
+  #Он не должен допускать больше чем 2 гласные буквы подряд
   it "It should not allow more than 2 vowel letters in a row" do 
-
+    1000.times do
+      rl_str_gen
+      .gsub(/[^а-яё ]/i, "")
+      .split
+      .each do |el|
+        # если нашел абривиатуру, то ничего не делать
+        unless el.match? /\АА-ЯЁ{2,}\z/
+          expect(el.match /\A[аоуэыияеёю]{3,}/i).to be_nil
+        end
+      end
+    end
   end
-
 
   # Он не должен допускать более двух одинаковых согласных букв подряд
   it "It should not allow more than 2 same consonant letters in a row" do 
-
+    1000.times do
+      rl_str_gen
+      .gsub(/[^а-яё ]/i, "")
+      .split
+      .each do |el|
+        # если нашел абривиатуру, то ничего не делать
+        unless el.match? /\АА-ЯЁ{2,}\z/
+          expect(el.match /\A([^аоуэыияеёю])\1\1/i).to be_nil
+        end
+      end
+    end
   end 
 
-  # Он должен содержать гласные, если не более 1 буквы и не аббревиатура. 
-  it "It should contains vowels if not more than 1 letter and not an accronym" do
-
-  end
-
-  # Начало предложения с заглавной буквы(помнить на счет кавычек, позволять кавычку в 
-  # начале строки)
+  # Начало предложения с заглавной буквы(помнить на счет кавычек, 
+  # позволять кавычку в начале строки)
   it "It should start with a capital letter" do
-
+    1000.times do
+      expect(rl_str_gen).to match(/\A\"?[А-ЯЁ]/)
+    end
   end
 
-  it "It should allow only particular one-letter words " do
 
+  # Он должен содержать не менее 40% гласных в многосложных словах.
+  it "It should contain at least 40 persent vowels in multi-syllable words" do 
+    1000.times do
+      rl_str_gen
+      .gsub(/[^а-яё ]/i, " ")
+      .split
+      .select { |w| w.match?(/[аоуэыияеёю].*[аоуэыияеёю]/i) }
+      .each do |el|
+        # если нашел абривиатуру, то ничего не делать
+        unless el.match? /\АА-ЯЁ{2,}\z/
+          found = el.scan(/\A[аоуэыияеёю]/i).size 
+          calc = (el.size * 0.4).to_i
+          res = found >= calc ? ">=#{calc} vowels" : "#{found} vowels"
+          expect([res, el]).to eq([">=#{calc} vowels", el])
+          # expect([comp, el]).to eq([true, el])
+        end
+      end
+    end
   end
 
+
+
+  # Он должен ??? гласных в односложных словах.  
+  it "It should ??? vowels in single-syllable words" do
+
+  end
 end
