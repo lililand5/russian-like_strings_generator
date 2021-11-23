@@ -12,10 +12,10 @@ describe "rl_str_gen" do
   end
 
 
-# долны быть только допустимые символы
+# должны быть только допустимые символы
   it "It should contain only valid symbols" do
     1000.times do
-      expect(rl_str_gen.match? /[^а-яё ,\.:;\-!\?\"]/i).to be false
+      expect(rl_str_gen.match(/[^а-яё ,\.:;\-!\?\"]/i)).to be_nil
     end
   end
 
@@ -87,7 +87,7 @@ describe "rl_str_gen" do
     end
   end
 
-
+########
 # Не допускается использование нескольких знаков препинания. 
   it "It should not allow multiple punctuation marks" do 
     1000.times do
@@ -137,7 +137,7 @@ describe "rl_str_gen" do
   end
 
 
-# Не допускать однобуквенные слова внутри предложения
+# Он не должен допускать однобуквенных слов с большой буквы. 
   it "It should not allow one-letter words with a capital letter" do 
     1000.times do 
       expect(rl_str_gen.match(/ \"?[А-ЯЁ]\b/)).to be_nil
@@ -161,7 +161,7 @@ describe "rl_str_gen" do
   end
 
 
-# В многобуквенном слове должна быть гласная.
+# В двухбуквенном и трехбуквенном слове должна быть гласная.
   it "It should always be vowel in 2 and 3-letter words" do 
     1000.times do
       rl_str_gen
@@ -181,7 +181,7 @@ describe "rl_str_gen" do
     1000.times do
       rl_str_gen.scan(/\b[а-яё]\b/i)
       .each do 
-        |word| expect(word).to match(/[аявоуиксжб]/i)
+        |word| expect(word).to match(/[аявоуикс]/i)
       end
     end
   end
