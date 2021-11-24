@@ -49,9 +49,23 @@ ONE_LETTER_WORDS_FREQ = {
 }.freeze
 
 
+# гласные
+VOWELS = [1072, 1077, 1080, 1086, 1091, 1099, 1101, 1102, 1103, 1105]
+
+# согласные
+CONSONANTS = [1073, 1074, 1075, 1076, 1078, 1079, 1081, 1082, 1083, 1084, 1085, 
+              1087, 1088, 1089, 1090, 1092, 1093, 1094, 1095, 1096, 1097]
+
+
+
+def select_letters(arr)
+   LETTERS_FREQ.select { |k, v| arr.any?(k) }
+end
+
+
 
 # вероятностный массив для однобуквенных слов
-# предоставь распределенный однобуквенный массив
+# provide_distribution предоставь распределенный однобуквенный массив
 def provide_distribution(hash)
   sample_array = []
   hash.each_key do |k|
@@ -59,15 +73,17 @@ def provide_distribution(hash)
     hash[k].times do 
       sample_array << k
     end
+  end
     sample_array.freeze
     sample_array
-  end
 end
 
+
 ONE_LETTER_WORDS_PROBABILITY_ARRAY = provide_distribution(ONE_LETTER_WORDS_FREQ)
+VOWOELS_PROBABILITY_ARRAY = provide_distribution(select_letters(VOWELS))
+CONSONANTS_PROBABILITY_ARRAY = provide_distribution(select_letters(CONSONANTS))
 
 
-LETTERS_PROBABILITY_ARRAY          = provide_distribution(LETTERS_FREQ)
 
 
 
@@ -78,8 +94,9 @@ LETTERS_PROBABILITY_ARRAY          = provide_distribution(LETTERS_FREQ)
 
 # методы
 
+
 def rl_str_gen #russian like strings generator
-  base_string
+  words_gen(plan_words).map{|a| a << 32}.flatten[0..-2].pack("U*")
 end
 
 
@@ -94,12 +111,10 @@ def base_string
     index += rand(2..16)
   end
 
-  # p arr.pack("U*")
   arr.pack("U*")
 end
 
 
-# p base_string
 
 def format_case(str)
   str.split
@@ -109,12 +124,6 @@ end
 def plan_words
   arr = Array.new(rand(2..15)) {{}}
   
-    # arr[el] = {
-    #   case: :downcase,
-    #   multi_syllable: true,
-    #   dash: true,
-    #   one_letter: false
-    #   }
     arr.each do |el|
       case rand(10)
       when 0
@@ -146,15 +155,17 @@ def plan_words
   end
 
 
-# массив с отдельными словами
+# Массив с отдельными словами
+# Получаем массив с хешами, где описаны свойства будущих свойств. 
+# Согласно этим условиям содаем производный массив, где каждый элемент
+# является массивом с интеджерам, который в будущем станет словом
 def words_gen(arr)
-
   arr.map do |el|
     case el[:case]
     when :accronym
       make_accronym
     when :downcase
-      make_common_word(el)     # make_common_word(el)
+      make_common_word(el)
     when :capital
       digital_capitalize(make_common_word(el))
     end
@@ -168,21 +179,14 @@ def make_accronym
 end
 
 
-# Правила:
-# не должно начинаться с ь ъ ы 
-# В начале слова всегда должна стоять гласная "е" или "о" после 'й'
-# Он должен разрешать только определенные буквы после "й" внутри слов
-# В двухбуквенном и трехбуквенном слове должна быть гласная
-# Он должен разрешать только определенные однобуквенные слова
-# Он не должен допускать более 4-х согласных букв подряд
-# Он не должен допускать больше чем 2 гласные буквы подряд
-# Он не должен допускать более двух одинаковых согласных букв подряд
-# Он должен содержать не менее 40% гласных в многосложных словах.
-# Должен содержать 5 и менее согласных в односложных словах
-# Он должен разрешать только "я е ё ю" после "ъ ь" 
-# В односложных словах не должно быть гласных в начале слова, 
-# если они состоят из 3 или более букв.
-
+def digital_capitalize(arr)
+  if arr[0] == 1105
+    arr[0] = 1025
+  elsif arr[0] > 1071
+    arr[0] -= 32
+  end
+  arr
+end
 
 
 def make_common_word(hash) 
@@ -191,8 +195,7 @@ def make_common_word(hash)
   if hash[:multi_syllable]
     word = generate_multi_syllable
   elsif hash[:one_letter]
-    ONE_LETTER_WORDS_PROBABILITY_ARRAY.sample
-
+    word = [ONE_LETTER_WORDS_PROBABILITY_ARRAY.sample]
   else
     word = generate_single_syllable_word
   end
@@ -205,26 +208,49 @@ def make_common_word(hash)
 end
 
 
+
 def generate_single_syllable_word
-
   length = rand(20) < 15 ? rand(2..4) : rand(5..7)
-  vowel = [1072, 1086, 1091, 1101, 1099, 1080, 1103, 1077, 1105, 1102].sample
-
-
-  [1073, 1074, 1075, 1076, 1078, 1079, 1082, 1083, 1084, 1085, 1087, 1088, 1089, 1090, 1092, 1093, 1094, 1095, 1096, 1097]
+  vowel = VOWOELS_PROBABILITY_ARRAY.sample
+  word = Array.new(length)
   
+  case length
+  when 2
+    word[rand(2)] = vowel
+  when 3, 4
+    word[rand(1..2)] = vowel
+  when 5, 6
+    word[-2] = vowel
+  end
+
+  word.map!{ |el| el ? el : CONSONANTS_PROBABILITY_ARRAY.sample }
+  word = manage_i_soft(word)
+  occasionaly_add_softening_sign(word)
+
 end
 
 
+def generate_multi_syllable
+  generate_single_syllable_word + generate_single_syllable_word
+end
 
-def digital_capitalize(arr)
-  if arr[0] == 1105
-    arr[0] = 1025
-  elsif arr[0] > 1071
-    arr[0] -= 32
-  end
+
+def occasionaly_add_softening_sign(arr)
   arr
 end
 
-# абревиатуры, односложные, многосложные, составные, однобуквенные, большая буква в начале строки
+
+def manage_i_soft(arr)
+  arr
+end
+
+
+def add_dash(arr)
+  arr
+end
+
+
+
+
+
 

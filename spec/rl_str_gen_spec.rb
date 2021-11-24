@@ -1,7 +1,19 @@
 require "rspec"
 require_relative "../app/methods"
+# require_relative "../app/init.rb"
 
 #russian-like_strings_generator_spec
+
+describe "nested_methods" do
+  it "" do 
+  end
+end
+
+describe "resulting sentence"
+  it "" do 
+  end
+end
+
 describe "rl_str_gen" do
 
 # должен вернуть строку 
@@ -91,7 +103,7 @@ describe "rl_str_gen" do
 # Не допускается использование нескольких знаков препинания. 
   it "It should not allow multiple punctuation marks" do 
     1000.times do
-      expect(rl_str_gen.match(/([^а-яё\.]) *\1/)).to be_nil
+      expect(rl_str_gen.match(/([^а-яё.]) *\1/i)).to be_nil
     end
   end
 
